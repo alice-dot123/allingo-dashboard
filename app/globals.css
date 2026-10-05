@@ -1,33 +1,97 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design tokens ──────────────────────────────────────────────────── */
+:root {
+  --bg:       #0b0e17;
+  --surface:  #131827;
+  --surface2: #1c2236;
+  --border:   #242d45;
+  --border2:  #2e3a56;
+  --fg:       #e2e8f8;
+  --fg2:      #8a97b8;
+  --fg3:      #505d7a;
+  --accent:   #4f6ef7;
+  --accent2:  #6b85ff;
+  --green:    #22c55e;
+  --red:      #f43f5e;
+  --yellow:   #f59e0b;
+  --purple:   #a855f7;
+  color-scheme: dark;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #0d1117;
-  color: #e6edf3;
+  background: var(--bg);
+  color: var(--fg);
   font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 
-.tab-active {
-  color: #e6edf3;
-  border-bottom: 2px solid #58a6ff;
-}
-.tab-inactive {
-  color: #8b949e;
-  border-bottom: 2px solid transparent;
-}
-.tab-inactive:hover { color: #c9d1d9; }
-
+/* ── Shared component classes ───────────────────────────────────────── */
 .card {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
 }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.section-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--surface2);
+  color: var(--fg2);
+}
+
+/* ── CTR chips ──────────────────────────────────────────────────────── */
+.ctr-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+}
+.ctr-hi  { background: rgba(34,197,94,.15);  color: #4ade80; }
+.ctr-mid { background: rgba(245,158,11,.12); color: #fbbf24; }
+.ctr-lo  { background: rgba(244,63,94,.12);  color: #fb7185; }
+
+/* ── Objective badges ───────────────────────────────────────────────── */
+.obj-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-right: 6px;
+}
+.obj-traffic { background: rgba(79,110,247,.15); color: #7b9aff; }
+.obj-signup  { background: rgba(168,85,247,.15); color: #c084fc; }
+
+/* ── Mono numbers ───────────────────────────────────────────────────── */
+.mono { font-family: 'IBM Plex Mono', monospace; }

@@ -3,102 +3,97 @@
 import { useState } from "react";
 
 interface CampaignRow {
-  campaign_id: string;
-  campaign_name: string;
-  objective: string;
-  spend: number;
-  impressions: number;
-  clicks: number;
-  ctr: number;
-  conversions: number;
-  cpa: number;
-  roas: number;
+  campaign_id: string; campaign_name: string; objective: string;
+  spend: number; impressions: number; clicks: number; ctr: number;
+  conversions: number; cpa: number; roas: number; spendPct: number;
 }
 
-type SortKey = keyof CampaignRow;
+function fmtVnd(n: number) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+  if (n >= 1_000)     return Math.round(n / 1_000) + "K";
+  return n.toLocaleString("en-US");
+}
+function fmtVndFull(n: number) {
+  return n.toLocaleString("vi-VN");
+}
+function fmtN(n: number) { return n.toLocaleString("en-US", { maximumFractionDigits: 0 }); }
 
-const objBadge: Record<string, string> = {
-  "MT-Signup":  "bg-purple-500/20 text-purple-300",
-  "MT-Traffic": "bg-blue-500/20   text-blue-300",
-};
+function CtrChip({ v }: { v: number }) {
+  const cls = v >= 0.8 ? "ctr-hi" : v >= 0.5 ? "ctr-mid" : "ctr-lo";
+  return <span className={`ctr-chip ${cls}`}>{v.toFixed(2)}%</span>;
+}
+
+type Col = "spend" | "impressions" | "clicks" | "ctr" | "conversions" | "cpa" | "roas";
 
 export default function CampaignTable({ data }: { data: CampaignRow[] }) {
-  const [sort, setSort] = useState<{ key: SortKey; asc: boolean }>({ key: "spend", asc: false });
+  const [sortCol, setSortCol] = useState<Col>("spend");
+  const [asc, setAsc]         = useState(false);
+
+  const maxSpend = Math.max(...data.map((r) => r.spend), 1);
+
+  function sort(col: Col) {
+    if (sortCol === col) setAsc((v) => !v);
+    else { setSortCol(col); setAsc(false); }
+  }
 
   const sorted = [...data].sort((a, b) => {
-    const av = a[sort.key] as number | string;
-    const bv = b[sort.key] as number | string;
-    const cmp = typeof av === "string" ? av.localeCompare(bv as string) : (av as number) - (bv as number);
-    return sort.asc ? cmp : -cmp;
+    const diff = a[sortCol] - b[sortCol];
+    return asc ? diff : -diff;
   });
 
-  const toggle = (key: SortKey) =>
-    setSort((s) => s.key === key ? { key, asc: !s.asc } : { key, asc: false });
-
-  const arrow = (key: SortKey) =>
-    sort.key === key ? (sort.asc ? " ↑" : " ↓") : "";
-
-  const th = (label: string, key: SortKey, align = "text-right") => (
-    <th
-      className={`px-3 py-2.5 text-xs font-medium text-[#8b949e] uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-[#e6edf3] transition-colors ${align}`}
-      onClick={() => toggle(key)}
-    >
-      {label}{arrow(key)}
+  const Th = ({ col, label }: { col: Col; label: string }) => (
+    <th className="cursor-pointer select-none hover:text-[var(--fg2)] transition-colors" onClick={() => sort(col)}>
+      {label}{sortCol === col ? (asc ? " ↑" : " ↓") : ""}
     </th>
   );
 
   return (
-    <div className="card overflow-hidden">
-      <div className="px-5 py-4 border-b border-[#21262d]">
-        <h2 className="text-sm font-semibold text-[#e6edf3]">Campaigns</h2>
+    <div className="card">
+      <div className="section-header">
+        <span className="section-title">Campaigns</span>
+        <span className="section-badge">{data.length} active</span>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-[#0d1117]/50">
+        <table className="w-full border-collapse text-[12px]">
+          <thead>
             <tr>
-              <th className="px-3 py-2.5 text-xs font-medium text-[#8b949e] uppercase tracking-wider text-left">Campaign</th>
-              {th("Spend",   "spend")}
-              {th("Impr.",   "impressions")}
-              {th("Clicks",  "clicks")}
-              {th("CTR",     "ctr")}
-              {th("Conv.",   "conversions")}
-              {th("CPA",     "cpa")}
-              {th("ROAS",    "roas")}
+              <th className="text-left px-[14px] py-[9px] text-[10.5px] font-semibold uppercase tracking-[.05em] text-[var(--fg3)] bg-black/20 border-b border-[var(--border)] whitespace-nowrap">
+                Campaign
+              </th>
+              {(["spend","impressions","clicks","ctr","conversions","cpa","roas"] as Col[]).map((col) => (
+                <Th key={col} col={col} label={
+                  col === "spend" ? "Spend ₫" :
+                  col === "impressions" ? "Impr." :
+                  col === "cpa" ? "CPA ₫" :
+                  col.toUpperCase()
+                } />
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#21262d]">
-            {sorted.map((c) => (
-              <tr key={c.campaign_id} className="hover:bg-[#161b22]/60 transition-colors">
-                <td className="px-3 py-3 max-w-[260px]">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-semibold shrink-0 ${
-                        objBadge[c.objective] ?? "bg-[#30363d] text-[#8b949e]"
-                      }`}
-                    >
-                      {c.objective}
-                    </span>
-                    <span className="truncate text-[#e6edf3] text-xs">{c.campaign_name}</span>
+          <tbody>
+            {sorted.map((r) => (
+              <tr key={r.campaign_id} className="border-b border-[var(--border)] last:border-0 hover:bg-[rgba(79,110,247,.04)] transition-colors">
+                <td className="px-[14px] py-[10px] text-left text-[var(--fg)] max-w-[240px]">
+                  <span className={`obj-badge ${r.objective.toLowerCase().includes("signup") ? "obj-signup" : "obj-traffic"}`}>
+                    {r.objective.toLowerCase().includes("signup") ? "Signup" : "Traffic"}
+                  </span>
+                  <span className="align-middle">{r.campaign_name}</span>
+                </td>
+                <td className="px-[14px] py-[10px] text-right font-mono text-[var(--fg2)]">
+                  <div className="flex items-center justify-end gap-2">
+                    <div className="h-[3px] rounded-sm bg-[var(--accent)] opacity-50"
+                      style={{ width: Math.round((r.spend / maxSpend) * 60) + "px" }} />
+                    {fmtVnd(r.spend)}
                   </div>
                 </td>
-                <td className="px-3 py-3 text-right text-[#e6edf3] font-medium">${c.spend.toFixed(2)}</td>
-                <td className="px-3 py-3 text-right text-[#8b949e]">{c.impressions.toLocaleString()}</td>
-                <td className="px-3 py-3 text-right text-[#8b949e]">{c.clicks.toLocaleString()}</td>
-                <td className="px-3 py-3 text-right text-[#8b949e]">{c.ctr.toFixed(2)}%</td>
-                <td className="px-3 py-3 text-right text-[#e6edf3]">{c.conversions.toFixed(0)}</td>
-                <td className="px-3 py-3 text-right text-[#8b949e]">${c.cpa.toFixed(2)}</td>
-                <td className="px-3 py-3 text-right">
-                  <span className={c.roas >= 1 ? "text-green-400" : "text-red-400"}>
-                    {c.roas.toFixed(2)}x
-                  </span>
-                </td>
+                <td className="px-[14px] py-[10px] text-right font-mono text-[var(--fg2)]">{fmtN(r.impressions)}</td>
+                <td className="px-[14px] py-[10px] text-right font-mono text-[var(--fg2)]">{fmtN(r.clicks)}</td>
+                <td className="px-[14px] py-[10px] text-right"><CtrChip v={r.ctr} /></td>
+                <td className="px-[14px] py-[10px] text-right font-mono text-[var(--fg2)]">{fmtN(r.conversions)}</td>
+                <td className="px-[14px] py-[10px] text-right font-mono text-[var(--fg2)]">{fmtVndFull(Math.round(r.cpa))}</td>
+                <td className="px-[14px] py-[10px] text-right font-mono text-[var(--fg2)]">{r.roas.toFixed(2)}x</td>
               </tr>
             ))}
-            {sorted.length === 0 && (
-              <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-[#8b949e] text-xs">No data</td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
