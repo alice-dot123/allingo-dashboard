@@ -32,7 +32,7 @@ export default function CreativeGrid({ data }: { data: CreativeRow[] }) {
 
   const sorted = [...data].sort((a, b) =>
     sortBy === "cpa" ? a.cpa - b.cpa : b[sortBy] - a[sortBy]
-  );
+  ).slice(0, 3);
 
   return (
     <div className="card overflow-hidden">
