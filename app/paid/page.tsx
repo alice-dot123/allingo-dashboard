@@ -193,7 +193,7 @@ export default function PaidPage() {
 
         {/* ── KPI cards ──────────────────────────────────────────────────── */}
         {kpi && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-[10px]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-[10px]">
             <KPICard label="Ad Spend"    value={fmtVnd(kpi.spend)}
               curr={kpi.spend}       prev={prevKpi?.spend}       higherIsBetter={false} />
             <KPICard label="Impressions" value={fmtN(kpi.impressions)}
@@ -206,8 +206,6 @@ export default function PaidPage() {
               curr={kpi.conversions} prev={prevKpi?.conversions} />
             <KPICard label="CPA"         value={fmtVndFull(Math.round(kpi.cpa))}
               curr={kpi.cpa}         prev={prevKpi?.cpa}         higherIsBetter={false} />
-            <KPICard label="ROAS"        value={kpi.roas.toFixed(2) + "x"}
-              curr={kpi.roas}        prev={prevKpi?.roas} />
           </div>
         )}
 
