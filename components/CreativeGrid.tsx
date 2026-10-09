@@ -29,7 +29,7 @@ export default function CreativeGrid({ data }: { data: CreativeRow[] }) {
 
   const sorted = [...data].sort((a, b) =>
     sortKey === "cpa" ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey]
-  ).slice(0, 3);
+  ).slice(0, 6);
 
   const SORTS: { k: SortKey; l: string }[] = [
     { k: "ctr", l: "CTR" },
